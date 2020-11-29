@@ -51,7 +51,7 @@ public:
     string Run();
 
     //Funcao que determina a traducao apropriada da linha, baseada na tabela de traducoes
-    void TranslateLine(string line);
+    string TranslateLine(string line);
 
 };
 
