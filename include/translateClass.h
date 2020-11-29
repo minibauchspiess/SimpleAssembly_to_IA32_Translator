@@ -6,6 +6,11 @@
 
 #include "lineOperations.h"
 
+//Definicoes para auxilio no uso da flag secFlag
+#define SEC_DATA 0
+#define SEC_BSS 1
+#define SEC_TEXT 2
+
 
 using namespace std;
 
@@ -38,6 +43,9 @@ private:
     string secData;   //section .data do IA32 (escrita no arquivo .s)
     string secBss;    //section .bss do IA32 (escrita no arquivo .s)
 
+    //Traducoes de cada comando
+    map<string,string> translations;
+
     //Flags de controle
     int secFlag;    //Flag indicando a qual sessao o trecho traduzido pertence (0 para .data, 1 para .bss e 2 para .text)
 
@@ -48,10 +56,15 @@ public:
     ~translateClass();
 
     //Principal funcao. Le linha e chama ciclicamente a funcao de traducao de instrucao, e insere as linhas traduzidas na posicao correta do codigo de saida
-    string Run();
+    void Run();
 
-    //Funcao que determina a traducao apropriada da linha, baseada na tabela de traducoes
+    //Funcoes de inicializacao
+    void InitSecStrings();  //Insere .data, .bss ou .text no comeco, insere as funcoes de escrita/leitura e possiveis \n no comeco
+    void InitTranslateTable();  //Inicializa a tabela com as traducoes
+
+    //Funcao que determina a traducao apropriada da linha, baseada na tabela de traducoes, e atualiza secFlag de acordo com o que tiver sido lido
     string TranslateLine(string line);
+    void WriteLine(string line);
 
 };
 

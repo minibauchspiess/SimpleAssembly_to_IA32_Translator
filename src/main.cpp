@@ -15,9 +15,9 @@ using namespace std;
 int main(int argc, char* argv[]){
 
     string a = "um dois";
-    string b = ", feijao com arroz";
+    a = a+", feijao com arroz";
 
-    cout<<a+b<<endl;
+    cout<<a<<endl;
 
     return 1;
 }
