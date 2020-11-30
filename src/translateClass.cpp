@@ -16,7 +16,6 @@ translateClass::translateClass(string inFileName){
 
 }
 
-
 translateClass::~translateClass(){
     //Libera os mapas
     translations.clear();
@@ -54,6 +53,7 @@ void translateClass::Run(){
 void translateClass::InitSecStrings(){
     //Secao .data
     secData = "section .data";
+    secData = secData + "\nzero db 0";
 
     //Secao .bss
     secBss = "\nsection .bss";
@@ -67,6 +67,23 @@ void translateClass::InitSecStrings(){
 
 void translateClass::InitTranslateTable(){
     //Insercao uma a uma das traducoes corretas na tabelas de traducoes
+    //ADD END -> add [acc], END
+    //SUB END -> sub [acc], END
+    //MULT END -> mul [acc], END
+    //DIV END -> div [acc], END
+    //JMP END -> jmp END
+    //JMPN END -> cmp [acc], zero \n jl END
+    //JMPP END -> cmp [acc], zero \n jg END
+    //JMPZ END -> cmp [acc], zero \n je END
+    //COPY END1, END2 -> 
+    //LOAD END -> 
+    //STORE END -> 
+    //INPUT END -> 
+    //OUTPUT END -> 
+    //C_INPUT END -> 
+    //C_OUTPUT END -> 
+    //S_INPUT END, IM -> 
+    //S_OUTPUT END, IM -> 
     translations.insert({"ADD","add"});
 
 }
