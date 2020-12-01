@@ -12,27 +12,70 @@ szCharLido EQU $-charLido
 
 section .text
 
-%define CHAR_ESCCHAR [EBP+8]
-_EscreverChar:  
+_LeerInteiro:
     enter 0,0
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, CHAR_ESCCHAR
-    mov edx, szChar
-    int 80h
-    leave
-    ret
+    ;Salva o valor anterior dos registradores utilizados (menos eax, ja reservado para retorno, como padrao)
+    push ebx
+    push ecx
+    push edx
 
-%define CHAR_LECHAR [EBP+8]
+    ;Le a string de 3 algarismos, no maximo
+    mov eax, 3
+    mov ebx, 0
+    mov ecx, [EBP+8]
+    mov edx, 3
+    int 80h
+
+    mov ecx, 0
+    ;Confere se tem o sinal -
+    cmp [EBP+8], '0'
+
+
+    _LeerInteiro_Loop:  ;ler char a char como numero, conferindo se eh de fato um numero ou se eh o enter
+    
+    mov eax, [EBP+8+ecx]
+
+
+
+
+
+_EscreverInteiro:
+
+;Parametro: endereco de memoria onde inserir a leitura
 _LeerChar:
     enter 0,0
     mov eax, 3
     mov ebx, 0
-    mov ecx, CHAR_LECHAR
-    mov edx, szCharLido
+    mov ecx, [EBP+8]
+    mov edx, 1
     int 80h
     leave
     ret
+
+;Parametro: endereco de memoria de onde pegar o char a escrever
+_EscreverChar:  
+    enter 0,0
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, [EBP+8]
+    mov edx, 1
+    int 80h
+    leave
+    ret
+
+;Parametros: endereco de memoria onde inserir a leitura, e quantos bytes ler
+_LeerString:
+    enter 0,0
+    mov eax, 3
+    mov ebx, 0
+    mov ecx, [EBP+8]
+    mov edx, [EBP+12]
+    int 80h
+    leave
+    ret
+
+
+_EscreverString:
 
 
 global _start
