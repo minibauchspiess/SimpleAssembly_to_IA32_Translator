@@ -14,8 +14,12 @@ using namespace std;
 
 int main(int argc, char* argv[]){
 
-    string a = "um dois";
-    a = a+", feijao com arroz";
+    string a = string("um dois")
+    + string(", feijao com arroz")
+    + string("\n5, 6")
+    + string(", molho ingles")
+    ;
+    //a = a+", feijao com arroz";
 
     cout<<a<<endl;
 
