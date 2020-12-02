@@ -297,3 +297,9 @@ _EscreverString:
 
 global _start
 _start: 
+
+SECTION TEXT
+SUB N
+MULT N
+DIV ONE
+DIV N+8

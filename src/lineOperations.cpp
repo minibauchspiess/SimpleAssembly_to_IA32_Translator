@@ -200,3 +200,21 @@ string lineOperations::RebuildLine(vector<string> tokens, bool useComma){
 bool lineOperations::IsLabel(string token){
     return token.back() == ':';
 }
+
+vector<string> lineOperations::TokensLabelM4(vector<string> tokens){
+    vector<string> newTokens;
+    uint j=0;
+    for(uint i=0; i<tokens.size(); i++){
+        if(tokens[i] == "+"){
+            j--;
+            newTokens.pop_back();
+            newTokens.push_back( tokens[i-1]+tokens[i] + to_string(4*stoi(tokens[i+1])) );
+            i++;
+        }
+        else{
+            newTokens.push_back(tokens[i]);
+        }
+        j++;
+    }
+    return newTokens;
+}

@@ -12,34 +12,4 @@ SUB N
 HAHA: EQU ONE
 MULT HUEHUE
 DIV HAHA
-MUL_N
-
-L1: EQU 1
-L2: EQU 0
-SECTION TEXT
-IF L1
-LOAD N ;faz esta opera¸c~ao se L1 for verdadeiro
-IF L2
-INPUT N ;faz esta opera¸c~ao se L2 for verdadeiro
-
-MUL_N
-HAHA: EQU ONE
-DIV_N
-DIV_N
-MUL_N
-SUB N
-DIV_N
-;INPUT N
-;LOAD N
-;FAT: SUB ONE
-;JMPZ FIM
-;STORE AUX
-;MUL_N 
-;LOAD AUX
-;JMP FAT
-;FIM: OUTPUT N
-;STOP
-SECTION DATA
-;AUX: SPACE
-N: SPACE
-ONE: CONST 1
+DIV N + 2

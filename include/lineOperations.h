@@ -33,4 +33,5 @@ public:
     static vector<string> ReplaceToken(vector<string> tokens, string oldToken, string newToken);   //Substitui um token por outro no vetor
     static string RebuildLine(vector<string> tokens, bool useComma = true);  //Reconstroi uma linha, utilizando os tokens passados
     static bool IsLabel(string token);
+    static vector<string> TokensLabelM4(vector<string> tokens);   //Identifica se ha rotulos com + X, e retorna esses 3 tokens como um so, com X*4 (sempre dword)
 };

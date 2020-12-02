@@ -7,14 +7,18 @@
 #include <map>
 #include <vector>
 
+#include "lineOperations.h"
+#include "preprocessClass.h"
 #include "translateClass.h"
 
 using namespace std;
 
 
 int main(int argc, char* argv[]){
-
-    translateClass transObj(argv[1]);
+    preprocessClass ppObj(argv[1]);
+    string ppFileName = ppObj.Run();
+    
+    translateClass transObj(ppFileName);
     transObj.Run();
 
 
