@@ -24,7 +24,7 @@ translateClass::~translateClass(){
 void translateClass::Run(){
 
     string line;    
-    do{
+    /*do{
         //Busca a proxima linha
         getline(inputFile, line);
 
@@ -34,7 +34,7 @@ void translateClass::Run(){
         //Insere a linha na string apropriada (a funcao reconhece a localicacao correta)
         WriteLine(line);
 
-    }while(!inputFile.eof());
+    }while(!inputFile.eof());*/
 
     //Com todas as strings completas, estas sao inseridas no arquivo de saida
     outFile<<secData;
@@ -51,17 +51,38 @@ void translateClass::Run(){
 }
 
 void translateClass::InitSecStrings(){
+    //As sessoes de inicializacao estao presentes nos arquivos da pasta 'IA32_Sections/'
+    ifstream secFile;   //Stream que abrira cada um dos arquivos
+    string line;
     //Secao .data
-    secData = "section .data";
-    secData = secData + "\nzero db 0";
+    secFile.open("IA32_Sections/Data");
+    do{
+        getline(secFile, line);
+        secData.append(line);
+        secData.append("\n");
+    }while(!secFile.eof());
+    secFile.close();
+
+    //secData = "section .data";
+    //secData = secData + "\nzero db 0";
 
     //Secao .bss
-    secBss = "\nsection .bss";
-    secBss = "\nacc resb 1";    //Para substituir o acumulador presente no assembly inventado
+    secFile.open("IA32_Sections/Bss");
+    do{
+        getline(secFile, line);
+        secData.append(line);
+        secData.append("\n");
+    }while(!secFile.eof());
+    secFile.close();
 
     //Secao .text
-    secText = "\nsection .text\n";
-    secText = secText + "";
+    secFile.open("IA32_Sections/Text");
+    do{
+        getline(secFile, line);
+        secData.append(line);
+        secData.append("\n");
+    }while(!secFile.eof());
+    secFile.close();
 
 }
 

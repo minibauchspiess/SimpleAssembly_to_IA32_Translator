@@ -6,6 +6,7 @@ szMsgBytesLidos2 EQU $-msgBytesLidos2
 msgOverflow db 0dh, 0ah, 'Muliplicacao com overflow para 32 bits', 0dh, 0ah
 szMsgOverflow EQU $-msgOverflow
 
+
 section .bss
 bytesLidos resd 1
 string resb 100
@@ -295,24 +296,4 @@ _EscreverString:
 
 
 global _start
-_start:        
-    
-    mov eax, 65536
-    mov ebx, -32768
-
-    push edx
-    imul ebx
-    jo _Overflow
-
-    pop edx
-
-    mov [string], eax
-    push string
-    call _EscreverInteiro
-
-
- _end:          
-    mov eax, 1      ;chamada de parar
-    mov ebx, 0      ;retorno de parada
-    int 80h         ;chama interrupcao para parar
-
+_start: 

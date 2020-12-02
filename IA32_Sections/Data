@@ -1,0 +1,7 @@
+section .data
+msgBytesLidos1 db 'Foram lidos '
+szMsgBytesLidos1 EQU $-msgBytesLidos1
+msgBytesLidos2 db ' bytes', 0dh, 0ah
+szMsgBytesLidos2 EQU $-msgBytesLidos2
+msgOverflow db 0dh, 0ah, 'Muliplicacao com overflow para 32 bits', 0dh, 0ah
+szMsgOverflow EQU $-msgOverflow

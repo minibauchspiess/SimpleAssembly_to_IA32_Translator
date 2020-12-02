@@ -14,14 +14,9 @@ using namespace std;
 
 int main(int argc, char* argv[]){
 
-    string a = string("um dois")
-    + string(", feijao com arroz")
-    + string("\n5, 6")
-    + string(", molho ingles")
-    ;
-    //a = a+", feijao com arroz";
+    translateClass transObj(argv[1]);
+    transObj.Run();
 
-    cout<<a<<endl;
 
     return 1;
 }

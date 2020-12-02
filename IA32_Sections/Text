@@ -1,16 +1,3 @@
-section .data
-msgBytesLidos1 db 'Foram lidos '
-szMsgBytesLidos1 EQU $-msgBytesLidos1
-msgBytesLidos2 db ' bytes', 0dh, 0ah
-szMsgBytesLidos2 EQU $-msgBytesLidos2
-msgOverflow db 0dh, 0ah, 'Muliplicacao com overflow para 32 bits', 0dh, 0ah
-szMsgOverflow EQU $-msgOverflow
-
-section .bss
-bytesLidos resd 1
-string resb 100
-szString EQU $-string
-
 
 section .text
 ;Utiliza registradores eax e edx para conferir se multiplicacao de 32 bits ocasionou overflow
@@ -295,24 +282,4 @@ _EscreverString:
 
 
 global _start
-_start:        
-    
-    mov eax, 65536
-    mov ebx, -32768
-
-    push edx
-    imul ebx
-    jo _Overflow
-
-    pop edx
-
-    mov [string], eax
-    push string
-    call _EscreverInteiro
-
-
- _end:          
-    mov eax, 1      ;chamada de parar
-    mov ebx, 0      ;retorno de parada
-    int 80h         ;chama interrupcao para parar
-
+_start: 
