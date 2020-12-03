@@ -208,7 +208,7 @@ vector<string> lineOperations::TokensLabelM4(vector<string> tokens){
         if(tokens[i] == "+"){
             j--;
             newTokens.pop_back();
-            newTokens.push_back( tokens[i-1]+tokens[i] + to_string(4*stoi(tokens[i+1])) );
+            newTokens.push_back( tokens[i-1]+tokens[i] + to_string(1*stoi(tokens[i+1])) );  //Originalmente era 4*, mas parece que o .s so roda direito com +1 (talvez pela forma que eu implementei)
             i++;
         }
         else{

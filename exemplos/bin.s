@@ -6,12 +6,14 @@ szMsgBytesLidos2 EQU $-msgBytesLidos2
 msgOverflow db 0dh, 0ah, 'Muliplicacao com overflow para 32 bits', 0dh, 0ah
 szMsgOverflow EQU $-msgOverflow
 
+
+DOIS dd 2
 section .bss
 bytesLidos resd 1
-aux resd 5
-inte resd 1
 
-
+OLD_DATA resd 1
+NEW_DATA resd 1
+TMP_DATA resd 1
 section .text
 ;Utiliza registradores eax e edx para conferir se multiplicacao de 32 bits ocasionou overflow
 _Overflow:
@@ -79,10 +81,6 @@ _LeerInteiro:
     mov ebx, 0      ;Zera os bits mais significativos, utilizar apenas o ultimo byte
     mov bl, byte [esi+ecx]
    
-    ;push eax
-    ;mov [inte], 
-
-
 
     ;Confere se o char lido eh um numero (se nao for, acabaram os numeros, sair da funcao)
     sub bl, 30h   ;Transforma de ASCII pra inteiro
@@ -299,21 +297,38 @@ _EscreverString:
 
 
 global _start
-_start:        
-    
-    
+_start: 
 
-    push dword aux
-    call _LeerInteiro
-
-    mov [aux], eax
-    push dword aux
-    call _EscreverInteiro
-
-
-
- _end:          
-    mov eax, 1      ;chamada de parar
-    mov ebx, 0      ;retorno de parada
-    int 80h         ;chama interrupcao para parar
-
+push eax
+push dword OLD_DATA
+call _LeerInteiro
+mov [OLD_DATA], eax
+pop eax
+mov eax, [OLD_DATA]
+L1:push edx
+cdq
+idiv dword [DOIS]
+pop edx
+mov [NEW_DATA], eax
+push edx
+imul dword [DOIS]
+jo _Overflow
+pop edx
+mov [TMP_DATA], eax
+mov eax, [OLD_DATA]
+sub eax, [TMP_DATA]
+mov [TMP_DATA], eax
+push eax
+push dword TMP_DATA
+call _EscreverInteiro
+pop eax
+push ebx
+mov ebx, [NEW_DATA]
+mov [OLD_DATA], ebx
+pop ebx
+mov eax, [OLD_DATA]
+cmp eax, 0
+jg L1
+mov eax, 1
+mov ebx, 0
+int 80h

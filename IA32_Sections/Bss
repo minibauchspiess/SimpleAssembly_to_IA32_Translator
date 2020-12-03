@@ -1,5 +1,3 @@
 
 section .bss
 bytesLidos resd 1
-string resb 100
-szString EQU $-string

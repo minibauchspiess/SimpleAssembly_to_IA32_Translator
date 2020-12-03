@@ -11,14 +11,12 @@ translateClass::translateClass(string inFileName){
     //Inicializa as strings auxiliares com seus respectivos comecos
     InitSecStrings();
 
-    //Inicializa a tabela com traducoes
-    InitTranslateTable();
+    //Para retirar lixo de memoria de secFlag
+    secFlag = 0;
 
 }
 
 translateClass::~translateClass(){
-    //Libera os mapas
-    translations.clear();
 }
 
 void translateClass::Run(){
@@ -75,8 +73,8 @@ void translateClass::InitSecStrings(){
     secFile.open("IA32_Sections/Bss");
     do{
         getline(secFile, line);
-        secData.append(line);
-        secData.append("\n");
+        secBss.append(line);
+        secBss.append("\n");
     }while(!secFile.eof());
     secFile.close();
 
@@ -84,35 +82,13 @@ void translateClass::InitSecStrings(){
     secFile.open("IA32_Sections/Text");
     do{
         getline(secFile, line);
-        secData.append(line);
-        secData.append("\n");
+        secText.append(line);
+        secText.append("\n");
     }while(!secFile.eof());
     secFile.close();
 
 }
 
-void translateClass::InitTranslateTable(){
-    //Insercao uma a uma das traducoes corretas na tabelas de traducoes
-    //ADD END -> add [acc], END
-    //SUB END -> sub [acc], END
-    //MULT END -> mul [acc], END
-    //DIV END -> div [acc], END
-    //JMP END -> jmp END
-    //JMPN END -> cmp [acc], zero \n jl END
-    //JMPP END -> cmp [acc], zero \n jg END
-    //JMPZ END -> cmp [acc], zero \n je END
-    //COPY END1, END2 -> 
-    //LOAD END -> 
-    //STORE END -> 
-    //INPUT END -> 
-    //OUTPUT END -> 
-    //C_INPUT END -> 
-    //C_OUTPUT END -> 
-    //S_INPUT END, IM -> 
-    //S_OUTPUT END, IM -> 
-    //translations.insert({"ADD","add"});
-
-}
 
 string translateClass::TranslateLine(string line){
     //Linha traduzida
@@ -125,44 +101,157 @@ string translateClass::TranslateLine(string line){
         return "";
     }
 
-    //Tratamento das coisas que vao pra section .data ou .bss
-    if(lineOperations::IsLabel(tokens[0])){ //Sendo label, o comando seguinte sera SPACE ou CONST
-        //Apaga o ':' no final do token, para inserir no arquivo final
-        tokens[0].pop_back();
-        
-        if(tokens[1] == "SPACE"){
-            secFlag = SEC_BSS;
-            
-            if(tokens.size() == 3){
-                transLine = tokens[0]+ " dd "+tokens[2];
-            }
-            else{
-                transLine = tokens[0]+" dd 1";
-            }
-            
+
+    //Recupera a instrucao (eh ou o primeiro ou o segundo token (caso tenha label no comeco))
+    string inst;
+    int arg1Pos;    //Onde encontrar o proximo argumento da instrucao
+    if(lineOperations::IsLabel(tokens[0])){
+        inst = tokens[1];
+        transLine = tokens[0];          //tokens[0] possui ':' no final, que sera retirado a depender da instrucao
+        arg1Pos = 2;
+    }
+    else{
+        inst = tokens[0];
+        transLine = "";
+        arg1Pos = 1;
+    }
+
+    if(inst == "SPACE"){
+        secFlag = SEC_BSS;
+        transLine.pop_back();       //Nessas instrucoes, a label nao possui ":"
+
+        if(tokens.size() == 3){
+            transLine = transLine + " resd "+tokens[arg1Pos];    //Para SPACE e CONST, sempre ha uma label no comeco
         }
-        else{       //Se nao for SPACE, sera CONST (a menos que o usuario seja troll)
-            secFlag = SEC_DATA;
-            transLine = tokens[0] + " resd " + tokens[2];
+        else{
+            transLine = transLine + " resd 1";
         }
     }
-    else{   //Qualquer diretiva aqui sera inserida na secao .text
+    else if(inst == "CONST"){
+        secFlag = SEC_DATA;
+        transLine.pop_back();
+        transLine = transLine + " dd " + tokens[arg1Pos];
+    }
+    else{
+        //Todas as seguintes instrucoes entram em .text
         secFlag = SEC_TEXT;
 
         //E eis o switch enorme com todas as traducoes (if else pq switch so aceita numero)
-        if(tokens[0] == "ADD"){
-            
+        if(inst == "ADD"){
+            transLine = transLine + "add eax, [" + tokens[arg1Pos] + "]";
         }
-
+        else if(inst == "SUB"){
+            transLine = transLine + "sub eax, [" + tokens[arg1Pos] + "]";
+        }
+        else if(inst == "MULT"){
+            transLine = transLine                               //Caso haja uma label, transLine ja iniciara com ela
+                    +   string("push edx\n")                    //edx eh utilizado no imul, seu valor deve ser preservado
+                    +   string("imul dword [") + tokens[arg1Pos] + "]\n"    //Instrucao em si
+                    +   string("jo _Overflow\n")                //Checagem de overflow
+                    +   string("pop edx");                      //Recupera valor de edx
+        }
+        else if(inst == "DIV"){
+            transLine = transLine                               //Caso haja uma label, transLine ja iniciara com ela
+                    +   string("push edx\n")                    //edx eh utilizado no idiv, seu valor deve ser preservado
+                    +   string("cdq\n")                         //Extende sinal de eax para edx
+                    +   string("idiv dword [") + tokens[arg1Pos] + "]\n"    //Instrucao em si
+                    +   string("pop edx");                      //Recupera valor de edx
+        }
+        else if(inst == "JMP"){
+            transLine = transLine + "jmp " + tokens[arg1Pos];
+        }
+        else if(inst == "JMPN"){
+            transLine = transLine 
+                    +   string("cmp eax, 0\n")
+                    +   string("jl " + tokens[arg1Pos]);
+        }
+        else if(inst == "JMPP"){
+            transLine = transLine 
+                    +   string("cmp eax, 0\n")
+                    +   string("jg " + tokens[arg1Pos]);
+        }
+        else if(inst == "JMPZ"){
+            transLine = transLine 
+                    +   string("cmp eax, 0\n")
+                    +   string("je " + tokens[arg1Pos]);
+        }
+        else if(inst == "COPY"){
+            transLine = transLine 
+                    +   string("push ebx\n")
+                    +   string("mov ebx, [") + tokens[arg1Pos] + string("]\n")
+                    +   string("mov [")+tokens[arg1Pos+1]+string("], ebx\n")
+                    +   string("pop ebx");
+        }
+        else if(inst == "LOAD"){
+            transLine = transLine + string("mov eax, [") + tokens[arg1Pos] + string("]");
+        }
+        else if(inst == "STORE"){
+            transLine = transLine + string("mov [") + tokens[arg1Pos] + string("], eax");
+        }
+        else if(inst == "INPUT"){
+            transLine = transLine 
+                    +   string("push eax\n")
+                    +   string("push dword ") + tokens[arg1Pos] + string("\n")
+                    +   string("call _LeerInteiro\n")
+                    +   string("mov [") + tokens[arg1Pos] + string("], eax\n")  //Saida da funcao em eax
+                    +   string("pop eax");
+        }
+        else if(inst == "OUTPUT"){
+            transLine = transLine 
+                    +   string("push eax\n")
+                    +   string("push dword ") + tokens[arg1Pos] + string("\n")
+                    +   string("call _EscreverInteiro\n")
+                    +   string("pop eax");
+        }
+        else if(inst == "C_INPUT"){
+            transLine = transLine 
+                    +   string("push eax\n")
+                    +   string("push dword ") + tokens[arg1Pos] + string("\n")
+                    +   string("call _LeerChar\n")
+                    +   string("pop eax");
+        }
+        else if(inst == "C_OUTPUT"){
+            transLine = transLine 
+                    +   string("push eax\n")
+                    +   string("push dword ") + tokens[arg1Pos] + string("\n")
+                    +   string("call _EscreverChar\n")
+                    +   string("pop eax");
+        }
+        else if(inst == "S_INPUT"){
+            transLine = transLine 
+                    +   string("push eax\n")
+                    +   string("push dword ") + tokens[arg1Pos] + string("\n")
+                    +   string("push dword ") + tokens[arg1Pos+1] + string("\n")
+                    +   string("call _LeerString\n")
+                    +   string("pop eax");
+        }
+        else if(inst == "S_OUTPUT"){
+            transLine = transLine 
+                    +   string("push eax\n")
+                    +   string("push dword ") + tokens[arg1Pos] + string("\n")
+                    +   string("push dword ") + tokens[arg1Pos+1] + string("\n")
+                    +   string("call _EscreverString\n")
+                    +   string("pop eax");
+        }
+        else if(inst == "STOP"){
+            transLine = transLine 
+                    +   string("mov eax, 1\n")
+                    +   string("mov ebx, 0\n")
+                    +   string("int 80h");
+        }
+        else{
+            return line;
+        }
+        
     }
 
-    return line;
+    return transLine;
 }
 
 void translateClass::WriteLine(string line){
     line = string("\n")+line;
     switch(secFlag){
-        case SEC_DATA:
+        case SEC_DATA: 
             secData = secData+line;
             break;
         case SEC_BSS:
